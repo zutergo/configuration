@@ -1,0 +1,21 @@
+session_name: session
+start_directory: ~
+windows:
+- window_name: workspace 
+  start_directory: workspace
+  focus: true
+  layout: main-horizontal
+  options:
+     main-pane-height: 30
+  panes:
+  - shell_command:
+      - vim 
+    focus: true
+- window_name: bash
+  panes:
+  - shell_command:
+
+
+
+
+
