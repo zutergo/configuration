@@ -41,11 +41,8 @@ Plugin 'junegunn/fzf.vim'
 Plugin 'w0rp/ale'
 
 " Git support
-"Plugin 'tpope/vim-fugitive'
-"Plugin 'airblade/vim-gitgutter'
-
-" Update ctags and csope files 
-Plugin 'ludovicchabant/vim-gutentags.git'
+Plugin 'tpope/vim-fugitive'
+Plugin 'airblade/vim-gitgutter'
 
 " All plugins must be added before the following line
 call vundle#end()
@@ -62,20 +59,18 @@ let python_highlight_all = 1
 " Show line numbers
 set number
 
-" Set tabs to have 4 spaces
-set tabstop=4
-
-" Set softtabstop 
-set softtabstop=4
-
-" Indent when moving to next line while writing code
-set autoindent
+" Set tabs
+set tabstop=2
+set softtabstop=2
 
 " Expand tabs into spaces
 set expandtab
 
+" Indent when moving to next line while writing code
+set autoindent
+
 " When using >> or << commnads, shift lines by 4 spaces
-set shiftwidth=4
+set shiftwidth=2
 
 " |:split filename| will put the new window below
 set splitbelow
@@ -112,9 +107,6 @@ colorscheme gruvbox
 " Open NERDTree with Ctrl+n
 map <C-n> :NERDTreeToggle<CR>
 
-" Ignore .pyc files in NERDTree
-let NERDTreeIgnore=['\.pyc$', '\~$']
-
 " Avoid swap files
 set noswapfile
 
@@ -134,7 +126,6 @@ nnoremap <C-H> <C-W><C-H>
 
 " Find tags file in subfolders
 set tags=./tags;/
-set tags+=~/.cache/tags/;
 
 " Make YouCompleteMe compatible with UltiSnips (using supertab)
 let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
@@ -151,14 +142,10 @@ let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
 let mapleader = ","
 
 " Do not redraw while executing macros (good performance config)
-set lazyredraw
+"set lazyredraw
 
 " Increase the amount of history of command line
 set history=200
-
-" Configure fzf
-set runtimepath+=~/.fzf
-let g:fzf_tags_command = 'ctags --extra=+f -R'
 
 " Set statusline
 set laststatus=2
@@ -188,12 +175,10 @@ set statusline+=\ %3p%%\                  " Percentage
 " ALE configuration
 let g:ale_cpp_clangtidy_checks=['*']
 
-" Gutentags configuration
-let g:gutentags_modules = ['ctags', 'cscope']
-let g:gutentags_cache_dir = expand('~/.cache/tags')
-let g:gutentags_project_root = ['.project', 'Makefile'] 
-let g:gutentags_plus_switch=1
-
+" Configure fzf
+set runtimepath+=~/.fzf
+let g:fzf_tags_command = 'ctags --extra=+f -R'
+"
 " Default fzf layout
 let g:fzf_layout = { 'down': '~40%' }
 
