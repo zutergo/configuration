@@ -44,6 +44,9 @@ Plugin 'w0rp/ale'
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
 
+" Update ctags and csope files 
+Plugin 'ludovicchabant/vim-gutentags.git'
+
 " All plugins must be added before the following line
 call vundle#end()
 
@@ -88,16 +91,6 @@ nnoremap <space> zA
 " Remap escape key
 inoremap jk <Esc>
 
-" Python configuration
-" Use the below highlight group when displaying bad whitespace is desired.
-highlight BadWhitespace ctermbg=red guibg=red
-
-" Display tabs at the beginning of a line in Python mode as bad.
-au BufRead,BufNewFile *.py,*.pyw match BadWhitespace /^\t\+/
-
-" Make trailing whitespace be flagged as bad.
-au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
-
 " Utf-8 support
 set encoding=utf-8
 
@@ -110,6 +103,13 @@ map <C-n> :NERDTreeToggle<CR>
 
 " Avoid swap files
 set noswapfile
+
+" Persistent undo
+set undodir=~/.cache/undodir
+set undofile
+
+" Copy and paste from clipboard
+set clipboard+=unnamed
 
 " No error if buffer is not saved
 set hidden
@@ -127,6 +127,7 @@ nnoremap <C-H> <C-W><C-H>
 
 " Find tags file in subfolders
 set tags=./tags;/
+set tags+=~/.cache/tags/;
 
 " Make YouCompleteMe compatible with UltiSnips (using supertab)
 let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
@@ -158,5 +159,30 @@ set statusline+=%P                        " percentage of file
 " ALE configuration
 let g:ale_cpp_clangtidy_checks=['*']
 
+" Gutentags configuration
+let g:gutentags_modules = ['ctags', 'cscope']
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+let g:gutentags_project_root = ['.project', 'Makefile'] 
+let g:gutentags_plus_switch=1
+
 " Configure fzf
 set runtimepath+=~/.fzf
+
+function! Cscope(option, query)
+  let color = '{ x = $1; $1 = ""; z = $3; $3 = ""; printf "\033[34m%s\033[0m:\033[31m%s\033[0m\011\033[37m%s\033[0m\n", x,z,$0; }'
+  let opts = {
+  \ 'source':  "cscope -dL" . a:option . " " . a:query . " | awk '" . color . "'",
+  \ 'options': ['--ansi', '--prompt', '> ',
+  \             '--multi', '--bind', 'alt-a:select-all,alt-d:deselect-all',
+  \             '--color', 'fg:188,fg+:222,bg+:#3a3a3a,hl+:104'],
+  \ 'down': '40%'
+  \ }
+  function! opts.sink(lines) 
+    let data = split(a:lines)
+    let file = split(data[0], ":")
+    execute 'e ' . '+' . file[1] . ' ' . file[0]
+  endfunction
+  call fzf#run(opts)
+endfunction
+
+command! Cscope call Cscope('0', expand('<cword>'))
