@@ -145,6 +145,7 @@ set statusline+=%P                        " percentage of file
 
 " ALE configuration
 let g:ale_cpp_clangtidy_checks=['*']
+let g:ale_fixers = {'cpp': ['clang-format']}
 
 " Gutentags configuration
 let g:gutentags_modules = ['ctags', 'cscope']
