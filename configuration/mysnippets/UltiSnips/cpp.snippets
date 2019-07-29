@@ -1,0 +1,90 @@
+## Exception 
+
+# exception boundary 
+snippet excb
+	namespace {
+
+	template <typename ${1:Callable}>
+	${2:type} call_and_translate_for_boundary($1&& f) noexcept
+	{
+		try
+		{
+			f();
+			return ${3:S_OK};
+		}
+		catch (my_error const& ex)      { return ex.result(); }
+		catch (std::bad_alloc const&)   { return E_OUTOFMEM;  }
+		catch (...)						{ std::terminate();   }
+	}
+
+	} //namespace
+
+	#ifdef __cplusplus
+	extern "C" {
+	#endif
+
+	${2:type} boundary_function()
+	{
+		return call_and_translate_for_boundary([&]
+		{
+			// ... code that may throw ...	
+		});
+	}
+
+	#ifdef __cplusplus
+	}
+	#endif
+endsnippet
+
+# wago disclaimer
+snippet wago
+//------------------------------------------------------------------------------
+// Copyright (c) WAGO Kontakttechnik GmbH & Co. KG
+//
+// PROPRIETARY RIGHTS are involved in the subject matter of this material. All
+// manufacturing, reproduction, use and sales rights pertaining to this
+// subject matter are governed by the license agreement. The recipient of this
+// software implicitly accepts the terms of the license.
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+///  \file     ${1:`!p snip.rv = snip.fn`}
+///
+///  \brief    ${2:Brief description} 
+///
+///  \author   Dietrich Derksen : WAGO Kontakttechnik GmbH & Co. KG
+//------------------------------------------------------------------------------
+$0
+endsnippet
+
+# meyers singleton
+snippet msingl
+static ${1:Singleton}& instance()
+{
+	static $1 ${2:s};
+	return $2;
+}
+endsnippet
+
+#gtest fixture
+snippet gtestfixture
+	/*! \class $1
+	*  \brief ${3:Brief class description}
+	*
+	*  ${4:Detailed description}
+	*/
+	using namespace testing;
+	class ${1:`vim_snippets#Filename('$1', 'name')`} : public ::testing::Test 
+	{
+	public:
+		$1(${2}) {}
+
+	virtual void SetUp() override {
+
+	}
+
+	virtual void TearDown() override {
+
+	}
+
+	};
+endsnippet
