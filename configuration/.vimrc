@@ -29,10 +29,6 @@ Plugin 'Raimondi/delimitMate'
 " Asynchroneuos build
 Plugin 'tpope/vim-dispatch'
 
-" Autocompletion plugin
-Plugin 'ervandew/supertab'
-Plugin 'Valloric/YouCompleteMe'
-
 " Snippet plugins
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
@@ -40,15 +36,21 @@ Plugin 'honza/vim-snippets'
 " Search for files
 Plugin 'junegunn/fzf.vim'
 
+" Autocompletion with Language Server Protocol
+Plugin 'prabirshrestha/async.vim'
+Plugin 'prabirshrestha/vim-lsp'
+Plugin 'prabirshrestha/asyncomplete.vim'
+Plugin 'prabirshrestha/asyncomplete-lsp.vim'
+Plugin 'prabirshrestha/asyncomplete-buffer.vim'
+Plugin 'prabirshrestha/asyncomplete-file.vim'
+Plugin 'prabirshrestha/asyncomplete-ultisnips.vim'
+    
 " Linter for all languages
 Plugin 'w0rp/ale'
 
 " Git support
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
-
-" Update ctags and csope files 
-Plugin 'ludovicchabant/vim-gutentags.git'
 
 " Practicing movement
 Plugin 'takac/vim-hardtime'
@@ -117,20 +119,6 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
-" Find tags file in subfolders
-set tags+=~/.cache/tags/;
-
-" Make YouCompleteMe compatible with UltiSnips (using supertab)
-let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
-let g:SuperTabDefaultCompletionType = '<C-n>'
-
-" Better key bindings for UltiSnipsExpandTrigger
-set runtimepath+=~/.vim/mysnippets/
-let g:UltiSnipsExpandTrigger = "<tab>"
-let g:UltiSnipsJumpForwardTrigger = "<tab>"
-let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
-
 " Map leader key to ","
 let mapleader = ","
 
@@ -147,11 +135,46 @@ set statusline+=%P                        " percentage of file
 let g:ale_cpp_clangtidy_checks=['*']
 let g:ale_fixers = {'cpp': ['clang-format']}
 
-" Gutentags configuration
-let g:gutentags_modules = ['ctags', 'cscope']
-let g:gutentags_cache_dir = expand('~/.cache/tags')
-let g:gutentags_project_root = ['.project', 'Makefile'] 
-let g:gutentags_plus_switch=1
-
 " Configure fzf
 set runtimepath+=~/.fzf
+
+" Clangd configuration for Language Server Protocol
+if executable('clangd')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'clangd',
+        \ 'cmd': {server_info->['clangd', '-background-index']},
+        \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp'],
+        \ })
+endif
+
+" Autocompletion configuration
+imap <c-space> <Plug>(asyncomplete_force_refresh)
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <cr>    pumvisible() ? "\<C-y>" : "\<cr>"
+
+if has('python3')
+    let g:UltiSnipsExpandTrigger="<c-e>"
+    call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
+        \ 'name': 'ultisnips',
+        \ 'whitelist': ['*'],
+        \ 'completor': function('asyncomplete#sources#ultisnips#completor'),
+        \ }))
+endif
+
+call asyncomplete#register_source(asyncomplete#sources#buffer#get_source_options({
+    \ 'name': 'buffer',
+    \ 'whitelist': ['*'],
+    \ 'blacklist': ['go'],
+    \ 'completor': function('asyncomplete#sources#buffer#completor'),
+    \ 'config': {
+    \    'max_buffer_size': 5000000,
+    \  },
+    \ }))
+
+au User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#file#get_source_options({
+    \ 'name': 'file',
+    \ 'whitelist': ['*'],
+    \ 'priority': 10,
+    \ 'completor': function('asyncomplete#sources#file#completor')
+    \ }))
