@@ -1,62 +1,50 @@
-" required for vundle
-set nocompatible
-filetype off
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * Plugstall --sync | source $MYVIMRC
+endif
 
-" Set the runtime path to include vundle
-set runtimepath+=~/.vim/bundle/Vundle.vim
-
-" Initialize vundle
-call vundle#begin()
-
-" Let vundle manage plugins
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin('~/.vim/plugged')
 
 " Default vim settings
-Plugin 'tpope/vim-sensible'
+Plug 'tpope/vim-sensible'
 
 " Directory navigation 
-Plugin 'scrooloose/nerdtree'
+Plug 'scrooloose/nerdtree'
 
-" Color scheme plugins
-Plugin 'morhetz/gruvbox'
+" Color scheme Plugs
+Plug 'morhetz/gruvbox'
 
-" Folding plugin
-Plugin 'pseewald/anyfold'
+" Folding Plug
+Plug 'pseewald/anyfold'
 
-" Autoclose plugin
-Plugin 'Raimondi/delimitMate'
+" Autoclose Plug
+Plug 'Raimondi/delimitMate'
 
 " Asynchroneuos build
-Plugin 'tpope/vim-dispatch'
+Plug 'tpope/vim-dispatch'
 
-" Snippet plugins
-Plugin 'SirVer/ultisnips'
-Plugin 'honza/vim-snippets'
+" Snippet Plugs
+"Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 
 " Search for files
-Plugin 'junegunn/fzf.vim'
+Plug 'junegunn/fzf.vim'
 
 " Autocompletion with Language Server Protocol
-Plugin 'prabirshrestha/async.vim'
-Plugin 'prabirshrestha/vim-lsp'
-Plugin 'prabirshrestha/asyncomplete.vim'
-Plugin 'prabirshrestha/asyncomplete-lsp.vim'
-Plugin 'prabirshrestha/asyncomplete-buffer.vim'
-Plugin 'prabirshrestha/asyncomplete-file.vim'
-Plugin 'prabirshrestha/asyncomplete-ultisnips.vim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
     
 " Linter for all languages
-Plugin 'w0rp/ale'
+Plug 'dense-analysis/ale'
 
 " Git support
-Plugin 'tpope/vim-fugitive'
-Plugin 'airblade/vim-gitgutter'
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
 
 " Practicing movement
-Plugin 'takac/vim-hardtime'
+Plug 'takac/vim-hardtime'
 
-" All plugins must be added before the following line
-call vundle#end()
+call plug#end()
 
 " Enable all Python syntax highlighting features
 let python_highlight_all = 1
@@ -69,6 +57,10 @@ set tabstop=2
 set softtabstop=2
 set expandtab
 set shiftwidth=2
+
+" Colorscheme
+set background=dark
+colorscheme gruvbox
 
 " |:split filename| will put the new window below
 set splitbelow
@@ -86,13 +78,6 @@ nnoremap <space> zA
 " Remap escape key
 inoremap jk <Esc>
 
-" Utf-8 support
-set encoding=utf-8
-
-" Colorscheme
-set background=dark
-colorscheme gruvbox
-
 " Open NERDTree with Ctrl+n
 map <C-n> :NERDTreeToggle<CR>
 
@@ -106,12 +91,12 @@ set undofile
 " Copy and paste from clipboard
 set clipboard+=unnamed
 
-" No error if buffer is not saved
-set hidden
-
 " For better searching
 set hlsearch
 set ignorecase
+
+" Allow switching unsaved buffers 
+set hidden
 
 " Easy split navigation
 nnoremap <C-J> <C-W><C-J>
@@ -134,47 +119,80 @@ set statusline+=%P                        " percentage of file
 " ALE configuration
 let g:ale_cpp_clangtidy_checks=['*']
 let g:ale_fixers = {'cpp': ['clang-format']}
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
 
 " Configure fzf
 set runtimepath+=~/.fzf
 
-" Clangd configuration for Language Server Protocol
-if executable('clangd')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'clangd',
-        \ 'cmd': {server_info->['clangd', '-background-index']},
-        \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp'],
-        \ })
-endif
-
 " Autocompletion configuration
-imap <c-space> <Plug>(asyncomplete_force_refresh)
-inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-inoremap <expr> <cr>    pumvisible() ? "\<C-y>" : "\<cr>"
 
-if has('python3')
-    let g:UltiSnipsExpandTrigger="<c-e>"
-    call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
-        \ 'name': 'ultisnips',
-        \ 'whitelist': ['*'],
-        \ 'completor': function('asyncomplete#sources#ultisnips#completor'),
-        \ }))
-endif
+" Some servers have issues with backup files
+set nobackup
+set nowritebackup
 
-call asyncomplete#register_source(asyncomplete#sources#buffer#get_source_options({
-    \ 'name': 'buffer',
-    \ 'whitelist': ['*'],
-    \ 'blacklist': ['go'],
-    \ 'completor': function('asyncomplete#sources#buffer#completor'),
-    \ 'config': {
-    \    'max_buffer_size': 5000000,
-    \  },
-    \ }))
+" Better display for messages
+set cmdheight=2
 
-au User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#file#get_source_options({
-    \ 'name': 'file',
-    \ 'whitelist': ['*'],
-    \ 'priority': 10,
-    \ 'completor': function('asyncomplete#sources#file#completor')
-    \ }))
+" You will have bad experience for diagnostic messages when it's default 4000.
+set updatetime=300
+
+" don't give |ins-completion-menu| messages.
+set shortmess+=c
+
+" always show signcolumns
+set signcolumn=yes
+
+" Use tab for trigger completion with characters ahead and navigate.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Remap keys for gotos
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" Highlight symbol under cursor on CursorHold
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Remap for rename current word
+nmap <leader>rn <Plug>(coc-rename)
+
+" Using CocList
+" Show all diagnostics
+nnoremap <silent> <leader>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions
+nnoremap <silent> <leader>e  :<C-u>CocList extensions<cr>
+" Show commands
+nnoremap <silent> <leader>c  :<C-u>CocList commands<cr>
+" Find symbol of current document
+nnoremap <silent> <leader>o  :<C-u>CocList outline<cr>
+" Search workspace symbols
+nnoremap <silent> <leader>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent> <leader>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent> <leader>k  :<C-u>CocPrev<CR>
+" Resume latest coc list
+nnoremap <silent> <leader>p  :<C-u>CocListResume<CR>
+let g:coc_snippet_next = '<tab>'
