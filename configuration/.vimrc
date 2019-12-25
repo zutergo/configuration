@@ -41,6 +41,12 @@ Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 
+" Statusline
+Plug 'vim-airline/vim-airline'
+
+" Undotree
+Plug 'mbbill/undotree'
+
 " Practicing movement
 Plug 'takac/vim-hardtime'
 
@@ -51,6 +57,9 @@ let python_highlight_all = 1
 
 " Show line numbers
 set number
+
+" Spellcheck
+set spell spelllang=en_us
 
 " Set tabs
 set tabstop=2
@@ -85,8 +94,10 @@ map <C-n> :NERDTreeToggle<CR>
 set noswapfile
 
 " Persistent undo
-set undodir=~/.cache/undodir
-set undofile
+if has("persistent_undo")
+  set undodir=~/.cache/undodir
+  set undofile
+endif
 
 " Copy and paste from clipboard
 set clipboard+=unnamed
@@ -106,15 +117,6 @@ nnoremap <C-H> <C-W><C-H>
 
 " Map leader key to ","
 let mapleader = ","
-
-" Set statusline
-set statusline=
-set statusline+=%<\                       " cut at start
-set statusline+=%2*[%n%H%M%R%W]%*\        " flags and buf no
-set statusline+=%-40f\                    " path
-set statusline+=%=%1*%y%*%*\              " file type
-set statusline+=%10((%l,%c)%)\            " line and column
-set statusline+=%P                        " percentage of file
 
 " ALE configuration
 let g:ale_linters = {
@@ -199,3 +201,6 @@ nnoremap <silent> <leader>k  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent> <leader>p  :<C-u>CocListResume<CR>
 let g:coc_snippet_next = '<tab>'
+
+
+packadd terminaldebug
