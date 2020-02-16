@@ -9,9 +9,6 @@ call plug#begin('~/.vim/plugged')
 " Default vim settings
 Plug 'tpope/vim-sensible'
 
-" Directory navigation 
-Plug 'scrooloose/nerdtree'
-
 " Color scheme Plugs
 Plug 'morhetz/gruvbox'
 
@@ -25,7 +22,6 @@ Plug 'Raimondi/delimitMate'
 Plug 'tpope/vim-dispatch'
 
 " Snippet Plugs
-"Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 
 " Search for files
@@ -46,9 +42,6 @@ Plug 'vim-airline/vim-airline'
 
 " Undotree
 Plug 'mbbill/undotree'
-
-" Practicing movement
-Plug 'takac/vim-hardtime'
 
 call plug#end()
 
@@ -87,9 +80,6 @@ nnoremap <space> zA
 " Remap escape key
 inoremap jk <Esc>
 
-" Open NERDTree with Ctrl+n
-map <C-n> :NERDTreeToggle<CR>
-
 " Avoid swap files
 set noswapfile
 
@@ -105,9 +95,6 @@ set clipboard+=unnamed
 " For better searching
 set hlsearch
 set ignorecase
-
-" Allow switching unsaved buffers 
-set hidden
 
 " Easy split navigation
 nnoremap <C-J> <C-W><C-J>
@@ -132,6 +119,7 @@ set runtimepath+=~/.fzf
 " Debug in terminal
 packadd terminaldebug
 
+" Autocompletion configuration.
 " if hidden is not set, TextEdit might fail.
 set hidden
 
