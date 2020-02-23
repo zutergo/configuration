@@ -24,12 +24,12 @@ Plug 'tpope/vim-dispatch'
 " Snippet Plugs
 Plug 'honza/vim-snippets'
 
+" Autocompletion with Language Server Protocol
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
 " Search for files
 Plug 'junegunn/fzf.vim'
 
-" Autocompletion with Language Server Protocol
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-    
 " Linter for all languages
 Plug 'dense-analysis/ale'
 
@@ -38,7 +38,22 @@ Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 
 " Statusline
-Plug 'vim-airline/vim-airline'
+Plug 'itchyny/lightline.vim'
+
+" Colored braces
+Plug 'frazrepo/vim-rainbow'
+
+"Indent levels
+Plug 'nathanaelkane/vim-indent-guides'
+
+" Jump between brackets with %
+Plug 'vim-scripts/matchit.zip'
+
+" Show trailing whitespaces
+Plug 'bronson/vim-trailing-whitespace'
+
+" Keymappings
+Plug 'tpope/vim-unimpaired'
 
 " Undotree
 Plug 'mbbill/undotree'
@@ -70,7 +85,7 @@ set splitbelow
 " |vsplit filename| will put the new window right
 set splitright
 
-" Enable folding 
+" Enable folding
 autocmd Filetype * AnyFoldActivate
 set foldlevel=99
 
@@ -119,6 +134,12 @@ set runtimepath+=~/.fzf
 " Debug in terminal
 packadd terminaldebug
 
+" Activate rainbow plugin on start
+let g:rainbow_active = 1
+
+" Activate indent guides on startup
+let g:indent_guides_enable_on_vim_startup = 1
+
 " Autocompletion configuration.
 " if hidden is not set, TextEdit might fail.
 set hidden
@@ -138,6 +159,8 @@ set shortmess+=c
 
 " always show signcolumns
 set signcolumn=yes
+
+let g:coc_global_extensions=["coc-python", "coc-snippets"]
 
 " Use tab for trigger completion with characters ahead and navigate.
 " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
@@ -171,7 +194,7 @@ nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
+'<cword>')
   else
     call CocAction('doHover')
   endif
@@ -244,4 +267,14 @@ nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
-let g:coc_global_extensions=["coc-python", "coc-snippets"]
+" Multiple cursors
+"nmap <silent> <C-d> <Plug>(coc-cursors-word)*
+"xmap <silent> <C-d> y/\V<C-r>=escape(@",'/\')<CR><CR>gN<Plug>(coc-cursors-range)gn
+
+nmap <expr> <silent> <C-d> <SID>select_current_word()
+function! s:select_current_word()
+  if !get(g:, 'coc_cursors_activated', 0)
+    return "\<Plug>(coc-cursors-word)"
+  endif
+  return "*\<Plug>(coc-cursors-word):nohlsearch\<CR>"
+endfunc
