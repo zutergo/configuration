@@ -12,16 +12,29 @@ Plug 'tpope/vim-sensible'
 " Color scheme Plugs
 Plug 'morhetz/gruvbox'
 
-" Folding Plug
+" Folding plugin
 Plug 'pseewald/anyfold'
 
 " Autoclose Plug
-Plug 'Raimondi/delimitMate'
+Plug 'jiangmiao/auto-pairs'
+
+" Comment code
+Plug 'scrooloose/nerdcommenter'
 
 " Asynchroneuos build
 Plug 'tpope/vim-dispatch'
 
-" Snippet Plugs
+" Surround with parentheses, brackets, quotes, XML tags, and more
+Plug 'tpope/vim-surround'
+
+" Better repeat
+Plug 'tpope/vim-repeat'
+
+" Continiously updateing sessions
+Plug 'tpope/vim-obsession'
+Plug 'dhruvasagar/vim-prosession'
+
+"Snippet Plugs
 Plug 'honza/vim-snippets'
 
 " Autocompletion with Language Server Protocol
@@ -37,11 +50,11 @@ Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 
+" Update ctags and csope files
+Plug 'ludovicchabant/vim-gutentags'
+
 " Statusline
 Plug 'itchyny/lightline.vim'
-
-" Colored braces
-Plug 'frazrepo/vim-rainbow'
 
 "Indent levels
 Plug 'nathanaelkane/vim-indent-guides'
@@ -53,18 +66,24 @@ Plug 'vim-scripts/matchit.zip'
 Plug 'bronson/vim-trailing-whitespace'
 
 " Keymappings
-Plug 'tpope/vim-unimpaired'
+"Plug 'tpope/vim-unimpaired'
 
 " Undotree
 Plug 'mbbill/undotree'
 
+" Better substitute
+Plug 'tpope/vim-abolish'
+
 call plug#end()
+
+" Add debug support
+packadd termdebug
 
 " Enable all Python syntax highlighting features
 let python_highlight_all = 1
 
 " Show line numbers
-set number
+set number relativenumber
 
 " Spellcheck
 set spell spelllang=en_us
@@ -74,6 +93,9 @@ set tabstop=2
 set softtabstop=2
 set expandtab
 set shiftwidth=2
+
+" Keep cursor in the middle
+set scrolloff=999
 
 " Colorscheme
 set background=dark
@@ -100,9 +122,16 @@ set noswapfile
 
 " Persistent undo
 if has("persistent_undo")
+  silent !mkdir -p ~/.cache/undodir > /dev/null 2>&1
   set undodir=~/.cache/undodir
   set undofile
 endif
+
+" Custom ultisnips config
+set runtimepath+=~/.vim/mysnippets/
+
+" Better display for messages
+set cmdheight=2
 
 " Copy and paste from clipboard
 set clipboard+=unnamed
@@ -111,34 +140,59 @@ set clipboard+=unnamed
 set hlsearch
 set ignorecase
 
+" Project specific vimrc
+set exrc
+set secure
+
 " Easy split navigation
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
+tnoremap <C-J> <C-W><C-J>
+tnoremap <C-K> <C-W><C-K>
+tnoremap <C-L> <C-W><C-L>
+tnoremap <C-H> <C-W><C-H>
+
 " Map leader key to ","
 let mapleader = ","
 
+" Search ctags file
+set tags=./*tags,*tags;
+
+" Gutentags configuration
+let g:gutentags_modules = ['ctags']
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+
 " ALE configuration
 let g:ale_linters = {
-      \  'cpp': ['clangtidy'],
+      \  'cpp': ['clangtidy', 'cppcheck'],
       \}
-let g:ale_cpp_clangtidy_checks=['*']
+let g:ale_c_clangtidy_extra_options='--config='
+let g:ale_cpp_clangtidy_extra_options='--config='
+let g:ale_cpp_clangtidy_checks=['*', '-abseil*', '-android*', '-fuchsia*', '-google*', '-objc*']
 let g:ale_fixers = {'cpp': ['clang-format']}
+let g:ale_c_clangformat_options = '-style=file'
+let g:ale_c_parse_compile_commands = 1
 let g:ale_fix_on_save = 1
 
 " Configure fzf
 set runtimepath+=~/.fzf
 
-" Debug in terminal
-packadd terminaldebug
+let g:fzf_action = {
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit',
+  \ 'ctrl-y': {lines -> setreg('', join(lines, "\n"))}}
 
 " Activate rainbow plugin on start
 let g:rainbow_active = 1
 
 " Activate indent guides on startup
-let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_enable_on_vim_startup=1
+let g:indent_guides_start_level=2
+let g:indent_guides_guide_size=1
 
 " Autocompletion configuration.
 " if hidden is not set, TextEdit might fail.
@@ -160,6 +214,11 @@ set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
 
+" Remap jumplist keys
+nnoremap <C-p> <C-o>
+nnoremap <C-o> <C-i>
+
+"Use tab for trigger completion with characters ahead and navigate.
 let g:coc_global_extensions=["coc-python", "coc-snippets"]
 
 " Use tab for trigger completion with characters ahead and navigate.
@@ -175,9 +234,14 @@ function! s:check_back_space() abort
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
+" Use <c-space> to trigger completion.
+inoremap <silent><expr> <c-space> coc#refresh()
+
 " Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
 " Coc only does snippet and additional edit on confirm.
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+" Or use `complete_info` if your vim support it, like:
+" inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
 
 " Use `[g` and `]g` to navigate diagnostics
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
@@ -271,7 +335,7 @@ nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 "nmap <silent> <C-d> <Plug>(coc-cursors-word)*
 "xmap <silent> <C-d> y/\V<C-r>=escape(@",'/\')<CR><CR>gN<Plug>(coc-cursors-range)gn
 
-nmap <expr> <silent> <C-d> <SID>select_current_word()
+nmap <expr> <silent> <C-f> <SID>select_current_word()
 function! s:select_current_word()
   if !get(g:, 'coc_cursors_activated', 0)
     return "\<Plug>(coc-cursors-word)"
