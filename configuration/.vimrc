@@ -30,7 +30,16 @@ Plug 'tpope/vim-surround'
 " Better repeat
 Plug 'tpope/vim-repeat'
 
-" Continiously updateing sessions
+"Switch between filetypes
+Plug 'tpope/vim-projectionist'
+
+" Different language packs
+Plug 'sheerun/vim-polyglot'
+
+"File handling
+Plug 'tpope/vim-eunuch'
+
+"Continiously updateing sessions
 Plug 'tpope/vim-obsession'
 Plug 'dhruvasagar/vim-prosession'
 
@@ -43,15 +52,9 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Search for files
 Plug 'junegunn/fzf.vim'
 
-" Linter for all languages
-Plug 'dense-analysis/ale'
-
 " Git support
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
-
-" Update ctags and csope files
-Plug 'ludovicchabant/vim-gutentags'
 
 " Statusline
 Plug 'itchyny/lightline.vim'
@@ -66,7 +69,7 @@ Plug 'vim-scripts/matchit.zip'
 Plug 'bronson/vim-trailing-whitespace'
 
 " Keymappings
-"Plug 'tpope/vim-unimpaired'
+Plug 'tpope/vim-unimpaired'
 
 " Undotree
 Plug 'mbbill/undotree'
@@ -78,6 +81,20 @@ call plug#end()
 
 " Add debug support
 packadd termdebug
+
+"Projectionist config
+let g:projectionist_heuristics = {
+      \   '*': {
+      \     '*.cpp': {
+      \       'alternate': '{}.h',
+      \       'type': 'source'
+      \     },
+      \     '*.h': {
+      \       'alternate': '{}.cpp',
+      \       'type': 'header'
+      \     },
+      \   }
+      \ }
 
 " Enable all Python syntax highlighting features
 let python_highlight_all = 1
@@ -161,33 +178,8 @@ let mapleader = ","
 " Search ctags file
 set tags=./*tags,*tags;
 
-" Gutentags configuration
-let g:gutentags_modules = ['ctags']
-let g:gutentags_cache_dir = expand('~/.cache/tags')
-
-" ALE configuration
-let g:ale_linters = {
-      \  'cpp': ['clangtidy', 'cppcheck'],
-      \}
-let g:ale_c_clangtidy_extra_options='--config='
-let g:ale_cpp_clangtidy_extra_options='--config='
-let g:ale_cpp_clangtidy_checks=['*', '-abseil*', '-android*', '-fuchsia*', '-google*', '-objc*']
-let g:ale_fixers = {'cpp': ['clang-format']}
-let g:ale_c_clangformat_options = '-style=file'
-let g:ale_c_parse_compile_commands = 1
-let g:ale_fix_on_save = 1
-
 " Configure fzf
 set runtimepath+=~/.fzf
-
-let g:fzf_action = {
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-x': 'split',
-  \ 'ctrl-v': 'vsplit',
-  \ 'ctrl-y': {lines -> setreg('', join(lines, "\n"))}}
-
-" Activate rainbow plugin on start
-let g:rainbow_active = 1
 
 " Activate indent guides on startup
 let g:indent_guides_enable_on_vim_startup=1
@@ -234,14 +226,8 @@ function! s:check_back_space() abort
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-" Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
-
 " Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-" Coc only does snippet and additional edit on confirm.
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-" Or use `complete_info` if your vim support it, like:
-" inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
 
 " Use `[g` and `]g` to navigate diagnostics
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
@@ -269,18 +255,6 @@ autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " Remap for rename current word
 nmap <leader>rn <Plug>(coc-rename)
-
-" Remap for format selected region
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-augroup mygroup
-  autocmd!
-  " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-  " Update signature help on jump placeholder
-  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-augroup end
 
 " Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
 xmap <leader>a  <Plug>(coc-codeaction-selected)
@@ -332,9 +306,6 @@ nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
 " Multiple cursors
-"nmap <silent> <C-d> <Plug>(coc-cursors-word)*
-"xmap <silent> <C-d> y/\V<C-r>=escape(@",'/\')<CR><CR>gN<Plug>(coc-cursors-range)gn
-
 nmap <expr> <silent> <C-f> <SID>select_current_word()
 function! s:select_current_word()
   if !get(g:, 'coc_cursors_activated', 0)
