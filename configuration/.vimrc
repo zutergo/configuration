@@ -24,6 +24,9 @@ Plug 'scrooloose/nerdcommenter'
 " Asynchroneuos build
 Plug 'tpope/vim-dispatch'
 
+" Debugging
+Plug 'puremourning/vimspector'
+
 " Surround with parentheses, brackets, quotes, XML tags, and more
 Plug 'tpope/vim-surround'
 
