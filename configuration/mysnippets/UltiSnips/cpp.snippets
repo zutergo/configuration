@@ -1,7 +1,7 @@
-## Exception 
+## Exception
 
-# exception boundary 
-snippet exception_boundary 
+# exception boundary
+snippet exception_boundary
 	namespace {
 
 	template <typename ${1:Callable}>
@@ -27,13 +27,22 @@ snippet exception_boundary
 	{
 		return call_and_translate_for_boundary([&]
 		{
-			// ... code that may throw ...	
+			// ... code that may throw ...
 		});
 	}
 
 	#ifdef __cplusplus
 	}
 	#endif
+endsnippet
+
+#ruleoffive
+snippet ruleoffive
+`!p snip.rv = snip.basename`(const `!p snip.rv = snip.basename` &) = ${1:default};
+`!p snip.rv = snip.basename`(`!p snip.rv = snip.basename` &&) = ${1:default};
+`!p snip.rv = snip.basename` &operator=(const `!p snip.rv = snip.basename` &) = ${1:default};
+`!p snip.rv = snip.basename` &operator=(`!p snip.rv = snip.basename` &&) = ${1:default};
+${2:virtual} ~`!p snip.rv = snip.basename`() = ${1:default};
 endsnippet
 
 # meyers singleton
@@ -53,7 +62,7 @@ snippet gtestfixture
 	*  ${4:Detailed description}
 	*/
 	using namespace testing;
-	class ${1:`vim_snippets#Filename('$1', 'name')`} : public ::testing::Test 
+	class ${1:`!p snip.rv = snip.basename`} : public ::testing::Test
 	{
 	public:
 		$1(${2}) {}
