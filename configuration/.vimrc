@@ -24,23 +24,14 @@ Plug 'scrooloose/nerdcommenter'
 " Asynchroneuos build
 Plug 'tpope/vim-dispatch'
 
-" Debugging
-Plug 'puremourning/vimspector'
-
 " Surround with parentheses, brackets, quotes, XML tags, and more
 Plug 'tpope/vim-surround'
 
 " Better repeat
 Plug 'tpope/vim-repeat'
 
-"Switch between filetypes
-Plug 'tpope/vim-projectionist'
-
 " Different language packs
 Plug 'sheerun/vim-polyglot'
-
-"File handling
-Plug 'tpope/vim-eunuch'
 
 "Continiously updateing sessions
 Plug 'tpope/vim-obsession'
@@ -65,12 +56,6 @@ Plug 'itchyny/lightline.vim'
 "Indent levels
 Plug 'nathanaelkane/vim-indent-guides'
 
-" Jump between brackets with %
-Plug 'vim-scripts/matchit.zip'
-
-" Show trailing whitespaces
-Plug 'bronson/vim-trailing-whitespace'
-
 " Keymappings
 Plug 'tpope/vim-unimpaired'
 
@@ -80,38 +65,42 @@ Plug 'mbbill/undotree'
 " Better substitute
 Plug 'tpope/vim-abolish'
 
+" Practice movement
+Plug 'takac/vim-hardtime'
+
+" Run code in repl
+Plug 'jpalardy/vim-slime'
+
+" Automatic tabs and spaces
+Plug 'tpope/vim-sleuth'
+
 call plug#end()
 
 " Add debug support
 packadd termdebug
+let g:termdebug_popup = 0
+let g:termdebug_wide = 163
 
-"Projectionist config
-let g:projectionist_heuristics = {
-      \   '*': {
-      \     '*.cpp': {
-      \       'alternate': '{}.h',
-      \       'type': 'source'
-      \     },
-      \     '*.h': {
-      \       'alternate': '{}.cpp',
-      \       'type': 'header'
-      \     },
-      \   }
-      \ }
+" Voltron commands
+command! -nargs=0 VoltronRegister :terminal voltron view register
+command! -nargs=0 VoltronStack :terminal voltron view stack
+command! -nargs=0 VoltronBacktrace :terminal voltron view backtrace
+command! -nargs=0 VoltronMemory :terminal voltron view memory 
+command! -nargs=0 VoltronDisasm :terminal voltron view disasm 
+command! -nargs=1 VoltronCommand :terminal voltron view command <args>
+command! -nargs=0 VoltronInfoLocals :terminal voltron view command "info locals"
+command! -nargs=0 VoltronInfoBreakpoints :terminal voltron view command "info breakpoints"
+command! -nargs=0 VoltronInfoThreads :terminal voltron view command "info threads"
 
-" Enable all Python syntax highlighting features
-let python_highlight_all = 1
+" Map leader key to space 
+let mapleader = " "
 
 " Show line numbers
 set number relativenumber
 
-" Spellcheck
-set spell spelllang=en_us
-
 " Set tabs
-set tabstop=2
-set softtabstop=2
 set expandtab
+set tabstop=2
 set shiftwidth=2
 
 " Keep cursor in the middle
@@ -131,9 +120,6 @@ set splitright
 autocmd Filetype * AnyFoldActivate
 set foldlevel=99
 
-" Enable folding with the spacebar
-nnoremap <space> zA
-
 " Remap escape key
 inoremap jk <Esc>
 
@@ -149,6 +135,9 @@ endif
 
 " Custom ultisnips config
 set runtimepath+=~/.vim/mysnippets/
+
+" Configure fzf
+set runtimepath+=~/.fzf
 
 " Better display for messages
 set cmdheight=2
@@ -175,19 +164,60 @@ tnoremap <C-K> <C-W><C-K>
 tnoremap <C-L> <C-W><C-L>
 tnoremap <C-H> <C-W><C-H>
 
-" Map leader key to ","
-let mapleader = ","
-
 " Search ctags file
 set tags=./*tags,*tags;
-
-" Configure fzf
-set runtimepath+=~/.fzf
 
 " Activate indent guides on startup
 let g:indent_guides_enable_on_vim_startup=1
 let g:indent_guides_start_level=2
 let g:indent_guides_guide_size=1
+
+" Use clang format
+function FormatBuffer()
+  if &modified && !empty(findfile('.clang-format', expand('%:p:h') . ';'))
+    let cursor_pos = getpos('.')
+    :%!clang-format
+    call setpos('.', cursor_pos)
+  endif
+endfunction
+
+" Vim slime config
+let g:slime_target = "tmux"
+let g:slime_default_config = {"socket_name": "default", "target_pane": "{last}"}
+
+autocmd BufWritePre *.h,*.hpp,*.c,*.cpp,*.vert,*.frag :call FormatBuffer()
+
+" Autocompletion configuration.
+
+"Use tab for trigger completion with characters ahead and navigate.
+let g:coc_global_extensions=["coc-python", "coc-snippets", "coc-clangd", "coc-cmake"]
+
+" Clangd mappings
+nnoremap <leader>s :CocCommand clangd.switchSourceHeader<CR>
+
+" Multiple cursors
+nmap <expr> <silent> <C-f> <SID>select_current_word()
+function! s:select_current_word()
+  if !get(g:, 'coc_cursors_activated', 0)
+    return "\<Plug>(coc-cursors-word)"
+  endif
+  return "*\<Plug>(coc-cursors-word):nohlsearch\<CR>"
+endfunc
+
+" Bash languageserver
+call coc#config('languageserver', {
+    \ 'bash': {
+    \  "command": "bash-language-server",
+    \  "args": ["start"],
+    \  "filetypes": ["sh"],
+    \ "ignoredRootPaths": ["~"]
+    \ }
+  	\ })
+
+" Coc Yank List
+nnoremap <silent> <leader>y  :<C-u>CocList -A --normal yank<cr>
+" if hidden is not set, TextEdit might fail.
+set hidden
 
 " TextEdit might fail if hidden is not set.
 set hidden
@@ -206,8 +236,14 @@ set updatetime=300
 " Don't pass messages to |ins-completion-menu|.
 set shortmess+=c
 
-" Add signcolumn
-set signcolumn=yes
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+if has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  set signcolumn=number
+else
+  set signcolumn=yes
+endif
 
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
@@ -331,3 +367,5 @@ nnoremap <silent> <space>j  :<C-u>CocNext<CR>
 nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+
+let g:hardtime_default_on = 1
