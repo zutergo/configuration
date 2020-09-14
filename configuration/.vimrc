@@ -49,6 +49,7 @@ Plug 'junegunn/fzf.vim'
 " Git support
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
+Plug 'rbong/vim-flog'
 
 " Statusline
 Plug 'itchyny/lightline.vim'
@@ -104,7 +105,7 @@ set tabstop=2
 set shiftwidth=2
 
 " Keep cursor in the middle
-set scrolloff=999
+"set scrolloff=999
 
 " Colorscheme
 set background=dark
@@ -190,7 +191,7 @@ autocmd BufWritePre *.h,*.hpp,*.c,*.cpp,*.vert,*.frag :call FormatBuffer()
 " Autocompletion configuration.
 
 "Use tab for trigger completion with characters ahead and navigate.
-let g:coc_global_extensions=["coc-python", "coc-snippets", "coc-clangd", "coc-cmake"]
+let g:coc_global_extensions=["coc-python", "coc-java", "coc-snippets", "coc-clangd", "coc-cmake", "coc-yank", "coc-sh", "coc-spell-checker", "coc-template"]
 
 " Clangd mappings
 nnoremap <leader>s :CocCommand clangd.switchSourceHeader<CR>
