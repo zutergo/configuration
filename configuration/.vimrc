@@ -27,6 +27,9 @@ Plug 'tpope/vim-dispatch'
 " Surround with parentheses, brackets, quotes, XML tags, and more
 Plug 'tpope/vim-surround'
 
+" Defines text objects 
+Plug 'wellle/targets.vim'
+
 " Better repeat
 Plug 'tpope/vim-repeat'
 
@@ -44,6 +47,7 @@ Plug 'honza/vim-snippets'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Search for files
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
 " Git support
@@ -69,9 +73,6 @@ Plug 'tpope/vim-abolish'
 " Practice movement
 Plug 'takac/vim-hardtime'
 
-" Run code in repl
-Plug 'jpalardy/vim-slime'
-
 " Automatic tabs and spaces
 Plug 'tpope/vim-sleuth'
 
@@ -81,17 +82,6 @@ call plug#end()
 packadd termdebug
 let g:termdebug_popup = 0
 let g:termdebug_wide = 163
-
-" Voltron commands
-command! -nargs=0 VoltronRegister :terminal voltron view register
-command! -nargs=0 VoltronStack :terminal voltron view stack
-command! -nargs=0 VoltronBacktrace :terminal voltron view backtrace
-command! -nargs=0 VoltronMemory :terminal voltron view memory 
-command! -nargs=0 VoltronDisasm :terminal voltron view disasm 
-command! -nargs=1 VoltronCommand :terminal voltron view command <args>
-command! -nargs=0 VoltronInfoLocals :terminal voltron view command "info locals"
-command! -nargs=0 VoltronInfoBreakpoints :terminal voltron view command "info breakpoints"
-command! -nargs=0 VoltronInfoThreads :terminal voltron view command "info threads"
 
 " Map leader key to space 
 let mapleader = " "
@@ -103,9 +93,6 @@ set number relativenumber
 set expandtab
 set tabstop=2
 set shiftwidth=2
-
-" Keep cursor in the middle
-"set scrolloff=999
 
 " Colorscheme
 set background=dark
@@ -173,25 +160,20 @@ let g:indent_guides_enable_on_vim_startup=1
 let g:indent_guides_start_level=2
 let g:indent_guides_guide_size=1
 
-" Use clang format
-function FormatBuffer()
-  if &modified && !empty(findfile('.clang-format', expand('%:p:h') . ';'))
-    let cursor_pos = getpos('.')
-    :%!clang-format
-    call setpos('.', cursor_pos)
-  endif
-endfunction
-
-" Vim slime config
-let g:slime_target = "tmux"
-let g:slime_default_config = {"socket_name": "default", "target_pane": "{last}"}
-
-autocmd BufWritePre *.h,*.hpp,*.c,*.cpp,*.vert,*.frag :call FormatBuffer()
-
 " Autocompletion configuration.
 
 "Use tab for trigger completion with characters ahead and navigate.
-let g:coc_global_extensions=["coc-python", "coc-java", "coc-snippets", "coc-clangd", "coc-cmake", "coc-yank", "coc-sh", "coc-spell-checker", "coc-template"]
+let g:coc_global_extensions=["coc-python", "coc-java", "coc-snippets", "coc-clangd", "coc-cmake", "coc-yank", "coc-sh", "coc-spell-checker", "coc-xml"]
+
+" Bash languageserver
+call coc#config('languageserver', {
+    \ 'bash': {
+    \  "command": "bash-language-server",
+    \  "args": ["start"],
+    \  "filetypes": ["sh"],
+    \ "ignoredRootPaths": ["~"]
+    \ }
+  	\ })
 
 " Clangd mappings
 nnoremap <leader>s :CocCommand clangd.switchSourceHeader<CR>
@@ -205,20 +187,8 @@ function! s:select_current_word()
   return "*\<Plug>(coc-cursors-word):nohlsearch\<CR>"
 endfunc
 
-" Bash languageserver
-call coc#config('languageserver', {
-    \ 'bash': {
-    \  "command": "bash-language-server",
-    \  "args": ["start"],
-    \  "filetypes": ["sh"],
-    \ "ignoredRootPaths": ["~"]
-    \ }
-  	\ })
-
 " Coc Yank List
 nnoremap <silent> <leader>y  :<C-u>CocList -A --normal yank<cr>
-" if hidden is not set, TextEdit might fail.
-set hidden
 
 " TextEdit might fail if hidden is not set.
 set hidden
@@ -302,6 +272,8 @@ nmap <leader>rn <Plug>(coc-rename)
 " Formatting selected code.
 xmap <leader>f  <Plug>(coc-format-selected)
 nmap <leader>f  <Plug>(coc-format-selected)
+autocmd BufWritePre *.h,*.hpp,*.c,*.cpp :call CocAction('format')
+
 
 augroup mygroup
   autocmd!
@@ -368,5 +340,3 @@ nnoremap <silent> <space>j  :<C-u>CocNext<CR>
 nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
-
-let g:hardtime_default_on = 1
